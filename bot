@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+# ===============================
+# AUTHOR: Pedro Bernardo
+# CREATE DATE: 23 Feb 2019
+# PURPOSE: Entrypoint function -> Main
+# ===============================
+
+import argparse
+import json
+from core.commands import *
+from core.BitBucketStatus import BitBucketStatus
+from core.SlackStatus import SlackStatus
+from core.GitHubStatus import GitHubStatus
+from core.GitLabStatus import GitLabStatus
+from core.GoogleDriveStatus import GoogleDriveStatus
+from core.StatusChecker import StatusChecker
+
+__SERVICES_MAP = { 
+                BitBucketStatus.ID: BitBucketStatus, 
+                SlackStatus.ID: SlackStatus, 
+                GitHubStatus.ID: GitHubStatus,
+                GitLabStatus.ID: GitLabStatus,
+                GoogleDriveStatus.ID: GoogleDriveStatus
+            }
+
+__COMMANDS_MAP = { 
+                DoBackup.ID: DoBackup, 
+                DoFetch.ID: DoFetch, 
+                DoHistory.ID: DoHistory,
+                DoPoll.ID: DoPoll,
+                DoRestore.ID: DoRestore,
+                DoServices.ID: DoServices,
+                DoStatus.ID: DoStatus
+            }
+
+__CONFIG_FILE = None
+
+def Main(args):
+    ids = __SERVICES_MAP.keys()
+    services = []
+
+    with open(__CONFIG_FILE, "r") as f:
+        config_data = json.load(f)
+
+
+
+    for service in config_data['services']:
+        # check if all services are valid
+        if service['id'] in ids:
+            service_class = __SERVICES_MAP[service['id']]
+            services.append(service_class(service['name'], service['url']))
+        else:  
+            # if not, build error message, print it and exit
+            available_ids = "Available ids:"
+            for i in ids:
+                available_ids += " " + i 
+             
+            print("Invalid service id: %s" % (service['id']) )
+            print(available_ids)
+            exit(1)
+
+    
+    command = args.command
+    if command != 'help':
+        command = __COMMANDS_MAP[command](services, args)
+        command.execute()
+    else:
+        print("statuscheck command [args]")
+        print("Commands:")
+        for cmd_id, cmd in __COMMANDS_MAP.items():
+            print("%s - %s" % (cmd_id, cmd.HELP))
+        print("help - This screen")
+
+    # now I have a list of initialized objects (services)
+    # and I have the desired command
+    
+
+def init_parser():
+    command_help = """
+            command to  execute:
+            poll, fetch, history, backup, restore, services, help, status.
+        """
+    arg_help = """
+            argument for the backup or restore commands.
+            Has to be a valid path.            
+        """
+
+    # create the top-level parser
+    parser = argparse.ArgumentParser()
+    subparsers = parser.add_subparsers(help=command_help, dest='command')
+    subparsers.required = True
+
+    #poll, fetch, history, backup, restore, services, help, status
+
+    # create the parser for the "poll" command
+    parser_poll = subparsers.add_parser('poll')
+    group = parser_poll.add_mutually_exclusive_group()
+    group.add_argument("--only", help="specify only a service", type=str, nargs=1)
+    group.add_argument("--exclude", help="every server except the specified", type=str, nargs=1)
+
+    # create the parser for the "fetch" command
+    parser_fetch = subparsers.add_parser('fetch')
+    parser_fetch.add_argument('--refresh', type=int, help='polling interval')
+    group = parser_fetch.add_mutually_exclusive_group()
+    group.add_argument("--only", help="specify only a service", type=str, nargs=1)
+    group.add_argument("--exclude", help="every server except the specified", type=str, nargs=1)
+    
+    # create the parser for the "history" command
+    parser_history = subparsers.add_parser('history')
+    parser_history.add_argument("--only", help="specify only a service", type=str, nargs=1)
+
+    # create the parser for the "backup" command
+    parser_backup = subparsers.add_parser('backup')
+    parser_backup.add_argument("path", help="specify a path for the backup file", type=str)
+    parser_backup.add_argument("--format", help="specify only a service", type=str, choices=['csv','txt'])
+
+    # create the parser for the "restore" command
+    parser_restore = subparsers.add_parser('restore')
+    parser_restore.add_argument("path", help="specify a path for the backup file", type=str)
+    parser_restore.add_argument("--merge", help="specify only a service", action='store_true')
+
+    # create the parser for the "services" command
+    parser_services = subparsers.add_parser('services')
+
+    # create the parser for the "help" command
+    parser_help = subparsers.add_parser('help')
+
+    # create the parser for the "status" command
+    parser_status = subparsers.add_parser('status')
+
+
+    return parser
+    
+
+if __name__ == '__main__':
+    parser = init_parser()
+    args = parser.parse_args()
+    
+    __CONFIG_FILE = "./config.json"
+    Main(args)

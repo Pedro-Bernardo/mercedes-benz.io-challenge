@@ -1,0 +1,28 @@
+{
+    "services": [
+        {
+            "id": "bitbucket",
+            "name": "Bitbucket",
+            "url": "https://status.bitbucket.org/"  
+        },
+        {
+            "id": "slack",
+            "name": "Slack",
+            "url": "https://status.slack.com/"
+        },
+        {
+            "id": "gitlab",
+            "name": "GitLab",
+            "url": "http://status.gitlab.com"
+        },
+        {
+            "id": "googledrive",
+            "name": "GoogleDrive",
+            "url": "https://www.google.com/appsstatus"
+        },
+        {
+            "id": "github",
+            "name": "GitHub",
+            "url": "https://status.github.com/messages"
+} ]
+}

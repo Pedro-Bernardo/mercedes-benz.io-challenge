@@ -1,0 +1,25 @@
+{
+    "services": [
+        {
+            "id": "bitbucket",
+            "name": "Bitbucket",
+            "url": "https://status.bitbucket.org/"  
+        },
+        {
+            "id": "slack",
+            "name": "Slack",
+            "url": "https://status.slack.com/"
+        },
+        {   
+            "id": "github",
+            "name": "GitHub",
+            "url": "https://www.githubstatus.com/"
+        },
+        {
+            "id": "gitlab",
+            "name": "GitLab",
+            "url": "http://status.gitlab.com"
+        }
+   ],
+   "history_file" : "history.py"
+}
