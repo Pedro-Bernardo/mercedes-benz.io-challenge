@@ -1,5 +1,6 @@
 # Mercedes-Benz.io Code Challenge - Service availability
 
+**2nd Place**  
 **Name:** Pedro Miguel Sousa Bernardo  
 **e-mail:** pedro_bernardo@icloud.com    
 **github:** https://github.com/Pedro-Bernardo  
